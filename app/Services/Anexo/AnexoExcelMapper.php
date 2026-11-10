@@ -86,18 +86,18 @@ class AnexoExcelMapper
             'item' => ['ITEM'],
             'codigo_unidad' => ['CODIGO DE UNIDAD', 'CODIGO UNIDAD'],
             'expediente_siged' => ['N EXPEDIENTE SIGED DE LA ASIGNACION DE SERVICIO', 'N EXPEDIENTE SIGED', 'EXPEDIENTE SIGED', 'NRO EXPEDIENTE SIGED'],
-            'fecha_asignacion' => ['FECHA DE ASIGNACION DE TRABAJO', 'FECHA DE ASIGNACION'],
+            'fecha_asignacion' => ['FECHA DE ASIGNACION DE TRABAJO', 'FECHA DE ASIGNACION', 'FECHA ASIGNACION'],
             'numero_documento' => ['N DE DOCUMENTO', 'N DOCUMENTO', 'NRO DOCUMENTO', 'NUMERO DOCUMENTO'],
             'codigo_osinergmin' => ['CODIGO DE OSINERMING', 'CODIGO OSINERGMIN'],
             'codigo_actividad' => ['CODIGO ACTIVIDAD'],
             'razon_social_agente' => ['RAZON SOCIAL DEL AGENTE Y O INSTALACION SUPERVISADO A', 'RAZON SOCIAL DEL AGENTE', 'RAZON SOCIAL AGENTE'],
             'tipo_supervision' => ['TIPO DE SUPERVISION FISCALIZACION', 'TIPO DE SUPERVISION', 'TIPO SUPERVISION'],
-            'tipo_entregable' => ['ENTREGABLE DEL SERVICIO TIPO DE DOCUMENTO INFORME OTROS', 'TIPO DE ENTREGABLE'],
+            'tipo_entregable' => ['ENTREGABLE DEL SERVICIO TIPO DE DOCUMENTO INFORME OTROS', 'TIPO DE ENTREGABLE', 'TIPO ENTREGABLE'],
             'numero_informe' => ['NUMERO DE INFORME', 'NRO INFORME', 'NUMERO INFORME'],
             'visitado' => ['VISITADO'],
             'efectividad' => ['EFECTIVIDAD'],
-            'fecha_visita' => ['FECHA DE VISITA'],
-            'fecha_derivacion' => ['FECHA DE DERIVACION DE ENTREGABLE SIGED CORRE', 'FECHA DE DERIVACION'],
+            'fecha_visita' => ['FECHA DE VISITA', 'FECHA VISITA'],
+            'fecha_derivacion' => ['FECHA DE DERIVACION DE ENTREGABLE SIGED CORRE', 'FECHA DE DERIVACION', 'FECHA DERIVACION'],
             'estado_entregable' => ['ESTADO DEL ENTREGABLE', 'ESTADO ENTREGABLE'],
             'personal_es' => ['NOMBRE Y APELLIDO DE PERSONAL DE LA ES', 'PERSONAL DE LA ES', 'PERSONAL ES'],
             'observaciones' => ['OBSERVACIONES'],
@@ -112,7 +112,9 @@ class AnexoExcelMapper
             foreach ($aliases as $field => $candidates) {
                 foreach ($candidates as $candidate) {
                     if (str_contains($normalized, $candidate)) {
-                        $map[$field] = $index;
+                        if (! isset($map[$field])) {
+                            $map[$field] = $index;
+                        }
                         continue 3;
                     }
                 }
@@ -252,6 +254,10 @@ class AnexoExcelMapper
 
             if ($spanishLongDate) {
                 return $spanishLongDate;
+            }
+
+            if (preg_match('#^\d{1,2}/\d{1,2}/\d{4}$#', trim((string) $value))) {
+                return Carbon::createFromFormat('d/m/Y', trim((string) $value))->format('Y-m-d');
             }
 
             return Carbon::parse((string) $value)->format('Y-m-d');
