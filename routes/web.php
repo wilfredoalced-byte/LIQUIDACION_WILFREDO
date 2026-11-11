@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AgenteController;
 use App\Http\Controllers\AnexoController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ExportarAnexoController;
@@ -11,6 +12,7 @@ Route::redirect('/', '/dashboard');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+Route::get('/agentes/buscar', [AgenteController::class, 'buscar'])->name('agentes.buscar');
 Route::resource('anexos', AnexoController::class);
 Route::get('/registros/exportar', [ExportarAnexoController::class, 'filtrado'])->name('registros.exportar.filtrado');
 Route::get('/registros/exportar-hoy', [ExportarAnexoController::class, 'hoy'])->name('registros.exportar.hoy');

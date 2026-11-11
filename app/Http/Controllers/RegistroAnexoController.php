@@ -55,6 +55,10 @@ class RegistroAnexoController extends Controller
             'selectedAnexoId' => $selectedAnexoId,
             'nextItemPreview' => $selectedAnexoId ? $this->nextItem($selectedAnexoId) : null,
             'estados' => $this->estadoOptions(),
+            'codigosUnidad' => \Illuminate\Support\Facades\Schema::hasTable('codigos_unidad') && \App\Models\CodigoUnidad::query()->exists()
+                ? \App\Models\CodigoUnidad::query()->orderBy('orden')->get(['codigo', 'descripcion', 'accion'])->unique('descripcion')->values()
+                : collect(config('catalogo_anexo.codigos_unidad', []))->map(fn ($d) => (object) ['codigo' => strtok($d, ' '), 'descripcion' => $d, 'accion' => null]),
+            'actividades' => \App\Models\Agente::query()->whereNotNull('codigo_actividad')->select('codigo_actividad', 'actividad')->distinct()->orderBy('codigo_actividad')->get(),
         ]);
     }
 
@@ -101,6 +105,10 @@ class RegistroAnexoController extends Controller
             'selectedAnexoId' => $registro->anexo_id,
             'nextItemPreview' => $registro->item,
             'estados' => $this->estadoOptions(),
+            'codigosUnidad' => \Illuminate\Support\Facades\Schema::hasTable('codigos_unidad') && \App\Models\CodigoUnidad::query()->exists()
+                ? \App\Models\CodigoUnidad::query()->orderBy('orden')->get(['codigo', 'descripcion', 'accion'])->unique('descripcion')->values()
+                : collect(config('catalogo_anexo.codigos_unidad', []))->map(fn ($d) => (object) ['codigo' => strtok($d, ' '), 'descripcion' => $d, 'accion' => null]),
+            'actividades' => \App\Models\Agente::query()->whereNotNull('codigo_actividad')->select('codigo_actividad', 'actividad')->distinct()->orderBy('codigo_actividad')->get(),
         ]);
     }
 
@@ -151,16 +159,16 @@ class RegistroAnexoController extends Controller
                     ->where(fn ($query) => $query->where('anexo_id', $request->input('anexo_id')))
                     ->ignore($registro?->id),
             ],
-            'codigo_unidad' => ['nullable', 'string', 'max:255'],
-            'expediente_siged' => ['nullable', 'string', 'max:255'],
+            'codigo_unidad' => ['required', 'string', 'max:255'],
+            'expediente_siged' => ['required', 'string', 'max:255'],
             'fecha_asignacion' => ['nullable', 'date'],
             'numero_documento' => ['nullable', 'string', 'max:255'],
             'codigo_osinergmin' => ['nullable', 'string', 'max:255'],
-            'codigo_actividad' => ['nullable', 'string', 'max:255'],
-            'razon_social_agente' => ['nullable', 'string'],
-            'tipo_supervision' => ['nullable', 'string', 'max:255'],
-            'tipo_entregable' => ['nullable', 'string', 'max:255'],
-            'numero_informe' => ['nullable', 'string', 'max:255'],
+            'codigo_actividad' => ['required', 'string', 'max:255'],
+            'razon_social_agente' => ['required', 'string'],
+            'tipo_supervision' => ['required', 'string', 'max:255'],
+            'tipo_entregable' => ['required', 'string', 'max:255'],
+            'numero_informe' => ['required', 'string', 'max:255'],
             'visitado' => ['nullable', 'boolean'],
             'efectividad' => ['nullable', 'boolean'],
             'fecha_visita' => ['nullable', 'date'],
@@ -169,6 +177,17 @@ class RegistroAnexoController extends Controller
             'personal_es' => ['nullable', 'string', 'max:255'],
             'observaciones' => ['nullable', 'string'],
             'comentarios' => ['nullable', 'string'],
+        ], [
+            'required' => 'El campo :attribute es obligatorio.',
+        ], [
+            'anexo_id' => 'ANEXO',
+            'codigo_unidad' => 'CODIGO UNIDAD',
+            'expediente_siged' => 'EXPEDIENTE SIGED',
+            'codigo_actividad' => 'CODIGO ACTIVIDAD',
+            'razon_social_agente' => 'RAZON SOCIAL AGENTE',
+            'tipo_supervision' => 'TIPO SUPERVISION',
+            'tipo_entregable' => 'TIPO ENTREGABLE',
+            'numero_informe' => 'NUMERO INFORME',
         ]);
 
         $validated['visitado'] = (bool) ($validated['visitado'] ?? false);
